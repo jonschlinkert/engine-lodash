@@ -1,0 +1,51 @@
+{
+  "name": "engine-lodash",
+  "description": "Lo-Dash engine conslidate.js style, but with enhancements. Works with Assemble or express.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/jonschlinkert/engine-lodash",
+  "author": {
+    "name": "Jon Schlinkert",
+    "url": "https://github.com/jonschlinkert"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jonschlinkert/engine-lodash.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jonschlinkert/engine-lodash/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/jonschlinkert/engine-lodash/blob/master/LICENSE-MIT"
+    }
+  ],
+  "keywords": [
+    "docs",
+    "documentation",
+    "generate",
+    "generator",
+    "markdown",
+    "templates",
+    "verb"
+  ],
+  "main": "index.js",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "^4.0.4",
+    "verb": ">= 0.2.6",
+    "verb-tag-jscomments": ">= 0.1.4"
+  },
+  "dependencies": {
+    "delims": "^0.3.0",
+    "engine-utils": "^0.1.0",
+    "escape-delims": "^0.1.1",
+    "lodash": "^2.4.1"
+  }
+}
