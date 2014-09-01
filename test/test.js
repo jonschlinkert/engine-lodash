@@ -1,5 +1,5 @@
 /*!
- * engine-cache <https://github.com/jonschlinkert/engine-cache>
+ * engine-lodash <https://github.com/jonschlinkert/engine-lodash>
  *
  * Copyright (c) 2014 Jon Schlinkert, Brian Woodward, contributors.
  * Licensed under the MIT license.
@@ -12,9 +12,33 @@ var path = require('path');
 var should = require('should');
 var lodash = require('..');
 
-describe('engines', function() {
 
-  it('should render content with lodash.', function(done) {
+describe('.renderSync()', function () {
+  it('should render templates.', function () {
+    var str = lodash.renderSync('Jon <%= name %>', {name: 'Schlinkert'});
+    str.should.equal('Jon Schlinkert');
+  });
+
+  it('should use custom delimiters.', function () {
+    var str = lodash.renderSync('Jon <%= name %> {%= name %}', {
+      delims: ['{%', '%}'],
+      name: 'Schlinkert'
+    });
+    str.should.equal('Jon <%= name %> Schlinkert');
+  });
+
+  it('should not render escaped delimiters.', function () {
+    var str = lodash.renderSync('Jon {%%= name %}', {
+      delims: ['{%', '%}'],
+      name: 'Schlinkert'
+    });
+    str.should.equal('Jon {%= name %}');
+  });
+});
+
+
+describe('.render()', function() {
+  it('should render templates.', function(done) {
     var ctx = {name: 'Jon Schlinkert'};
 
     lodash.render('<%= name %>', ctx, function (err, content) {
@@ -50,7 +74,7 @@ describe('engines', function() {
           return fs.readFileSync(filepath, 'utf8');
         },
         upper: function(str) {
-          return str.toUpperCase()
+          return str.toUpperCase();
         }
       }
     };
@@ -61,3 +85,16 @@ describe('engines', function() {
     });
   });
 });
+
+
+describe('.renderFile()', function() {
+  it('should render templates from a file.', function(done) {
+    var ctx = {name: 'Jon Schlinkert'};
+
+    lodash.renderFile('test/fixtures/default.tmpl', ctx, function (err, content) {
+      content.should.equal('Jon Schlinkert');
+      done();
+    });
+  });
+});
+
