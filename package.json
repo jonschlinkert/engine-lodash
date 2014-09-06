@@ -29,6 +29,7 @@
     "lo-dash",
     "underscore",
     "templates",
+    "template",
     "compile",
     "render",
     "process",

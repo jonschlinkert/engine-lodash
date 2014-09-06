@@ -23,7 +23,8 @@ var engine = utils.fromStringRenderer('lodash');
  * Lodash string support. Render the given `str` and invoke the callback `callback(err, str)`.
  *
  * ```js
- * lodash.render('<%= name %>', {name: 'Jon Schlinkert'}, function (err, content) {
+ * var engine = require('engine-lodash');
+ * engine.render('<%= name %>', {name: 'Jon Schlinkert'}, function (err, content) {
  *   console.log(content); //=> 'Jon Schlinkert'
  * });
  * ```
@@ -146,7 +147,7 @@ engine.renderFile = function renderFile(filepath, options, callback) {
   var opts = _.extend({}, options);
   try {
     var str;
-    if (options.cache) {
+    if (opts.cache) {
       str = engine.cache[filepath] || (engine.cache[filepath] = fs.readFileSync(filepath, 'utf8'));
     } else {
       str = fs.readFileSync(filepath, 'utf8');
@@ -167,5 +168,9 @@ engine.cache = {};
 
 engine.__express = engine.renderFile;
 
+
+/**
+ * Expose `engine`
+ */
 
 module.exports = engine;
