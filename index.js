@@ -11,13 +11,11 @@ var Delimiters = require('delims');
 var delimiters = new Delimiters();
 var _ = require('lodash');
 
-
 /**
  * Lodash support.
  */
 
 var engine = utils.fromStringRenderer('lodash');
-
 
 /**
  * Lodash string support. Render the given `str` and invoke the callback `callback(err, str)`.
@@ -37,21 +35,18 @@ var engine = utils.fromStringRenderer('lodash');
  * @api public
  */
 
-engine.render = function render(str, options, callback) {
+engine.render = function render(str, options, cb) {
   if (typeof options === 'function') {
-    callback = options;
+    cb = options;
     options = {};
   }
 
-  var opts = _.extend({}, options);
+  var opts = options || {};
   if (!opts.noescape) {
     str = delimsEscape.escape(str);
   }
 
-  var settings = {};
-
-  _.extend(settings, opts);
-  _.extend(settings, opts.settings);
+  var settings = _.merge({}, opts, opts.settings);
   settings.imports = opts.imports || opts.helpers || {};
 
   if (opts.mixins) {
@@ -59,12 +54,19 @@ engine.render = function render(str, options, callback) {
   }
 
   if (opts.delims) {
-    var delims = delimiters.templates(opts.delims);
-    _.extend(settings, delims, opts);
+    _.merge(settings, delimiters.templates(opts.delims), opts);
+  }
+
+  // cache requires .filename
+  if (opts.cache && !opts.filename) {
+    return cb(new Error('the "filename" option is required for caching'));
   }
 
   try {
-    var tmpl = utils.cache(opts) || utils.cache(opts, _.template(str, null, settings));
+    var path = options.filename;
+    var tmpl = opts.cache
+      ? utils.cache[path] || (utils.cache[path] = _.template(str, null, settings))
+      : _.template(str, null, settings);
     var rendered = tmpl(opts);
 
     if (opts.delims) {
@@ -72,13 +74,11 @@ engine.render = function render(str, options, callback) {
     }
 
     // Pass file extension for use in assemble v0.6.x
-    callback(null, rendered, '.html');
+    cb(null, rendered, '.html');
   } catch (err) {
-    callback(err);
+    cb(err);
   }
 };
-
-
 
 /**
  * Render Lo-Dash or underscore templates synchronously.
@@ -93,7 +93,7 @@ engine.render = function render(str, options, callback) {
  */
 
 engine.renderSync = function renderSync(str, options) {
-  var opts = _.extend({}, options);
+  var opts = _.merge({}, options);
 
   if (!opts.noescape) {
     str = delimsEscape.escape(str);
@@ -101,8 +101,8 @@ engine.renderSync = function renderSync(str, options) {
 
   var settings = {};
 
-  _.extend(settings, opts);
-  _.extend(settings, opts.settings);
+  _.merge(settings, opts);
+  _.merge(settings, opts.settings);
   settings.imports = opts.imports || opts.helpers || {};
 
   if (opts.mixins) {
@@ -111,11 +111,19 @@ engine.renderSync = function renderSync(str, options) {
 
   if (opts.delims) {
     var delims = delimiters.templates(opts.delims);
-    _.extend(settings, delims, opts);
+    _.merge(settings, delims, opts);
+  }
+
+  // cache requires .filename
+  if (opts.cache && !opts.filename) {
+    return cb(new Error('the "filename" option is required for caching'));
   }
 
   try {
-    var tmpl = utils.cache(opts) || utils.cache(opts, _.template(str, null, settings));
+    var path = options.filename;
+    var tmpl = opts.cache
+      ? utils.cache[path] || (utils.cache[path] = _.template(str, null, settings))
+      : _.template(str, null, settings);
     var rendered = tmpl(opts);
 
     if (opts.delims) {
@@ -128,7 +136,6 @@ engine.renderSync = function renderSync(str, options) {
   }
 };
 
-
 /**
  * Lodash file support. Render a file at the given `filepath` and callback `callback(err, str)`.
  *
@@ -138,36 +145,28 @@ engine.renderSync = function renderSync(str, options) {
  * @api public
  */
 
-engine.renderFile = function renderFile(filepath, options, callback) {
+engine.renderFile = function renderFile(filepath, options, cb) {
   if (typeof options === 'function') {
-    callback = options;
+    cb = options;
     options = {};
   }
 
-  var opts = _.extend({}, options);
-  try {
-    var str;
-    if (opts.cache) {
-      str = engine.cache[filepath] || (engine.cache[filepath] = fs.readFileSync(filepath, 'utf8'));
-    } else {
-      str = fs.readFileSync(filepath, 'utf8');
-    }
+  options.filename = filepath;
 
-    engine.render(str, opts, callback);
+  try {
+    var str = fs.readFileSync(filepath, 'utf8');
+    engine.render(str, options, cb);
   } catch (err) {
-    callback(err);
+    cb(err);
+    return;
   }
 };
-
-engine.cache = {};
-
 
 /**
  * Express support.
  */
 
 engine.__express = engine.renderFile;
-
 
 /**
  * Expose `engine`
