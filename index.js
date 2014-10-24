@@ -22,8 +22,8 @@ var engine = utils.fromStringRenderer('lodash');
  *
  * ```js
  * var engine = require('engine-lodash');
- * engine.render('<%= name %>', {name: 'Jon Schlinkert'}, function (err, content) {
- *   console.log(content); //=> 'Jon Schlinkert'
+ * engine.render('<%= name %>', {name: 'Jon'}, function (err, content) {
+ *   console.log(content); //=> 'Jon'
  * });
  * ```
  *
@@ -57,18 +57,8 @@ engine.render = function render(str, options, cb) {
     _.merge(settings, delimiters.templates(opts.delims), opts);
   }
 
-  // cache requires .filename
-  if (opts.cache && !opts.filename) {
-    return cb(new Error('the "filename" option is required for caching'));
-  }
-
   try {
-    var path = options.filename;
-    var tmpl = opts.cache
-      ? utils.cache[path] || (utils.cache[path] = _.template(str, null, settings))
-      : _.template(str, null, settings);
-    var rendered = tmpl(opts);
-
+    var rendered = _.template(str, opts, settings);
     if (opts.delims) {
       rendered = delimsEscape.unescape(rendered);
     }
@@ -82,6 +72,12 @@ engine.render = function render(str, options, cb) {
 
 /**
  * Render Lo-Dash or underscore templates synchronously.
+ *
+ * ```js
+ * var engine = require('engine-lodash');
+ * engine.renderSync('<%= name %>', {name: 'Jon'});
+ * //=> 'Jon'
+ * ```
  *
  * @param  {Object} `str` The string to render.
  * @param  {Object} `options` Object of options.
@@ -114,18 +110,8 @@ engine.renderSync = function renderSync(str, options) {
     _.merge(settings, delims, opts);
   }
 
-  // cache requires .filename
-  if (opts.cache && !opts.filename) {
-    return cb(new Error('the "filename" option is required for caching'));
-  }
-
   try {
-    var path = options.filename;
-    var tmpl = opts.cache
-      ? utils.cache[path] || (utils.cache[path] = _.template(str, null, settings))
-      : _.template(str, null, settings);
-    var rendered = tmpl(opts);
-
+    var rendered = _.template(str, opts, settings);
     if (opts.delims) {
       rendered = delimsEscape.unescape(rendered);
     }
@@ -139,6 +125,12 @@ engine.renderSync = function renderSync(str, options) {
 /**
  * Lodash file support. Render a file at the given `filepath` and callback `callback(err, str)`.
  *
+ * ```js
+ * var engine = require('engine-lodash');
+ * engine.renderSync('foo/bar/baz.tmpl', {name: 'Jon'});
+ * //=> 'Jon'
+ * ```
+ *
  * @param {String} `path`
  * @param {Object|Function} `options` or callback function.
  * @param {Function} `callback`
@@ -150,8 +142,6 @@ engine.renderFile = function renderFile(filepath, options, cb) {
     cb = options;
     options = {};
   }
-
-  options.filename = filepath;
 
   try {
     var str = fs.readFileSync(filepath, 'utf8');

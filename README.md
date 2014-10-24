@@ -26,26 +26,38 @@ Lodash string support. Render the given `str` and invoke the callback `callback(
 
 ```js
 var engine = require('engine-lodash');
-engine.render('<%= name %>', {name: 'Jon Schlinkert'}, function (err, content) {
-  console.log(content); //=> 'Jon Schlinkert'
+engine.render('<%= name %>', {name: 'Jon'}, function (err, content) {
+  console.log(content); //=> 'Jon'
 });
 ```
 
-### [.renderSync](index.js#L95)
+### [.renderSync](index.js#L91)
+
+Render Lo-Dash or underscore templates synchronously.
 
 * `str` **{Object}**: The string to render.    
 * `options` **{Object}**: Object of options.    
 * `returns` **{String}**: Rendered string.  
 
-Render Lo-Dash or underscore templates synchronously.
+```js
+var engine = require('engine-lodash');
+engine.renderSync('<%= name %>', {name: 'Jon'});
+//=> 'Jon'
+```
 
-### [.renderFile](index.js#L148)
+### [.renderFile](index.js#L140)
+
+Lodash file support. Render a file at the given `filepath` and callback `callback(err, str)`.
 
 * `path` **{String}**    
 * `options` **{Object|Function}**: or callback function.    
 * `callback` **{Function}**    
 
-Lodash file support. Render a file at the given `filepath` and callback `callback(err, str)`.
+```js
+var engine = require('engine-lodash');
+engine.renderSync('foo/bar/baz.tmpl', {name: 'Jon'});
+//=> 'Jon'
+```
 
 ## Author
 
