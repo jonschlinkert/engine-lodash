@@ -59,7 +59,7 @@ engine.render = function render(str, options, cb) {
 
   try {
     var rendered = _.template(str, opts, settings);
-    if (opts.delims) {
+    if (!opts.noescape) {
       rendered = delimsEscape.unescape(rendered);
     }
 
@@ -112,7 +112,7 @@ engine.renderSync = function renderSync(str, options) {
 
   try {
     var rendered = _.template(str, opts, settings);
-    if (opts.delims) {
+    if (!opts.noescape) {
       rendered = delimsEscape.unescape(rendered);
     }
 
