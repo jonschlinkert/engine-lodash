@@ -49,6 +49,7 @@ engine.render = function lodashRender(str, options, cb) {
     _.mixin(options.mixins);
   }
 
+  var delims = _.pick(options, ['interpolate', 'evaluate', 'escape']);
   var opts = _.omit(options, ['helpers', 'imports']);
   if (!opts.noescape) {
     str = delimsEscape.escape(str);
@@ -58,19 +59,24 @@ engine.render = function lodashRender(str, options, cb) {
 
   var settings = {};
   if (options.delims) {
-    settings = _.merge({}, delimiters.templates(options.delims), settings);
+    delims = _.merge({}, delimiters.templates(options.delims), delims);
   }
 
   settings.imports = _.extend({}, fns.helpers, fns.imports);
+  settings = _.extend({}, settings, delims);
 
-  var helpers = Object.keys(settings.imports);
-  for (var key in opts) {
-    if (helpers.indexOf(key) !== -1) {
-      console.log(chalk.yellow('[engine-lodash] property "' + key + '" is on both:'));
-      console.log(chalk.yellow('  - settings.imports as a(n): ', typeof settings.imports[key]));
-      console.log(chalk.yellow('  - options as a(n): ', typeof options[key]));
+  if (options.debugEngine) {
+    var helpers = Object.keys(settings.imports);
+    for (var key in opts) {
+      if (helpers.indexOf(key) !== -1) {
+        console.log(chalk.yellow('[engine-lodash] property "' + key + '" is on both:'));
+        console.log(chalk.yellow('  - settings.imports as a(n): ', typeof settings.imports[key]));
+        console.log(chalk.yellow('  - options as a(n): ', typeof options[key]));
+      }
     }
   }
+
+  opts = _.merge({}, opts, settings.imports);
 
   try {
     var rendered = _.template(str, opts, settings);

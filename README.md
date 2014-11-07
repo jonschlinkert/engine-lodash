@@ -31,7 +31,7 @@ engine.render('<%= name %>', {name: 'Jon'}, function (err, content) {
 });
 ```
 
-### [.renderSync](index.js#L108)
+### [.renderSync](index.js#L114)
 
 Render Lo-Dash or underscore templates synchronously.
 
@@ -45,7 +45,7 @@ engine.renderSync('<%= name %>', {name: 'Jon'});
 //=> 'Jon'
 ```
 
-### [.renderFile](index.js#L159)
+### [.renderFile](index.js#L165)
 
 Lodash file support. Render a file at the given `filepath` and callback `callback(err, str)`.
 
