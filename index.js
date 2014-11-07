@@ -6,6 +6,8 @@
 
 var fs = require('fs');
 var utils = require('engine-utils');
+var debug = require('debug')('engine:lodash');
+var chalk = require('chalk');
 var delimsEscape = require('escape-delims');
 var Delimiters = require('delims');
 var delimiters = new Delimiters();
@@ -35,26 +37,39 @@ var engine = utils.fromStringRenderer('lodash');
  * @api public
  */
 
-engine.render = function render(str, options, cb) {
+engine.render = function lodashRender(str, options, cb) {
   if (typeof options === 'function') {
     cb = options;
     options = {};
   }
 
-  var opts = options || {};
+  options = options || {};
+
+  if (options.mixins) {
+    _.mixin(options.mixins);
+  }
+
+  var opts = _.omit(options, ['helpers', 'imports']);
   if (!opts.noescape) {
     str = delimsEscape.escape(str);
   }
 
-  var settings = _.merge({}, opts, opts.settings);
-  settings.imports = opts.imports || opts.helpers || {};
+  var fns = _.pick(options, ['helpers', 'imports']);
 
-  if (opts.mixins) {
-    _.mixin(opts.mixins);
+  var settings = {};
+  if (options.delims) {
+    settings = _.merge({}, delimiters.templates(options.delims), settings);
   }
 
-  if (opts.delims) {
-    _.merge(settings, delimiters.templates(opts.delims), opts);
+  settings.imports = _.extend({}, fns.helpers, fns.imports);
+
+  var helpers = Object.keys(settings.imports);
+  for (var key in opts) {
+    if (helpers.indexOf(key) !== -1) {
+      console.log(chalk.yellow('[engine-lodash] property "' + key + '" is on both:'));
+      console.log(chalk.yellow('  - settings.imports as a(n): ', typeof settings.imports[key]));
+      console.log(chalk.yellow('  - options as a(n): ', typeof options[key]));
+    }
   }
 
   try {
@@ -66,6 +81,8 @@ engine.render = function render(str, options, cb) {
     // Pass file extension for use in assemble v0.6.x
     cb(null, rendered, '.html');
   } catch (err) {
+    console.log(chalk.red('%j'), err);
+    debug('engine lodash [render]: %j', err);
     cb(err);
   }
 };
@@ -88,7 +105,7 @@ engine.render = function render(str, options, cb) {
  * @api public
  */
 
-engine.renderSync = function renderSync(str, options) {
+engine.renderSync = function lodashRenderSync(str, options) {
   var opts = _.merge({}, options);
 
   if (!opts.noescape) {
@@ -118,6 +135,8 @@ engine.renderSync = function renderSync(str, options) {
 
     return rendered;
   } catch (err) {
+    console.log(chalk.red('%j'), err);
+    debug('engine lodash [renderSync]: %j', err);
     return err;
   }
 };
@@ -137,7 +156,7 @@ engine.renderSync = function renderSync(str, options) {
  * @api public
  */
 
-engine.renderFile = function renderFile(filepath, options, cb) {
+engine.renderFile = function lodashRenderFile(filepath, options, cb) {
   if (typeof options === 'function') {
     cb = options;
     options = {};
@@ -147,6 +166,8 @@ engine.renderFile = function renderFile(filepath, options, cb) {
     var str = fs.readFileSync(filepath, 'utf8');
     engine.render(str, options, cb);
   } catch (err) {
+    console.log(chalk.red('%j'), err);
+    debug('engine lodash [renderFile]: %j', err);
     cb(err);
     return;
   }
