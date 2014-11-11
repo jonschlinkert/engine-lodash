@@ -26,14 +26,6 @@ describe('.renderSync()', function () {
     });
     str.should.equal('Jon <%= name %> Schlinkert');
   });
-
-  it('should not render escaped delimiters.', function () {
-    var str = lodash.renderSync('Jon {%%= name %}', {
-      delims: ['{%', '%}'],
-      name: 'Schlinkert'
-    });
-    str.should.equal('Jon {%= name %}');
-  });
 });
 
 

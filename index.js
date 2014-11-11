@@ -8,7 +8,6 @@ var fs = require('fs');
 var utils = require('engine-utils');
 var debug = require('debug')('engine:lodash');
 var chalk = require('chalk');
-var delimsEscape = require('escape-delims');
 var Delimiters = require('delims');
 var delimiters = new Delimiters();
 var _ = require('lodash');
@@ -51,10 +50,6 @@ engine.render = function lodashRender(str, options, cb) {
 
   var delims = _.pick(options, ['interpolate', 'evaluate', 'escape']);
   var opts = _.omit(options, ['helpers', 'imports']);
-  if (!opts.noescape) {
-    str = delimsEscape.escape(str);
-  }
-
   var fns = _.pick(options, ['helpers', 'imports']);
 
   var settings = {};
@@ -77,15 +72,9 @@ engine.render = function lodashRender(str, options, cb) {
   }
 
   opts = _.merge({}, opts, settings.imports);
-
   try {
-    var rendered = _.template(str, opts, settings);
-    if (!opts.noescape) {
-      rendered = delimsEscape.unescape(rendered);
-    }
-
     // Pass file extension for use in assemble v0.6.x
-    cb(null, rendered, '.html');
+    cb(null, _.template(str, opts, settings), '.html');
   } catch (err) {
     console.log(chalk.red('%j'), err);
     debug('engine lodash [render]: %j', err);
@@ -113,11 +102,6 @@ engine.render = function lodashRender(str, options, cb) {
 
 engine.renderSync = function lodashRenderSync(str, options) {
   var opts = _.merge({}, options);
-
-  if (!opts.noescape) {
-    str = delimsEscape.escape(str);
-  }
-
   var settings = {};
 
   _.merge(settings, opts);
@@ -134,12 +118,7 @@ engine.renderSync = function lodashRenderSync(str, options) {
   }
 
   try {
-    var rendered = _.template(str, opts, settings);
-    if (!opts.noescape) {
-      rendered = delimsEscape.unescape(rendered);
-    }
-
-    return rendered;
+    return _.template(str, opts, settings);
   } catch (err) {
     console.log(chalk.red('%j'), err);
     debug('engine lodash [renderSync]: %j', err);
@@ -152,7 +131,7 @@ engine.renderSync = function lodashRenderSync(str, options) {
  *
  * ```js
  * var engine = require('engine-lodash');
- * engine.renderSync('foo/bar/baz.tmpl', {name: 'Jon'});
+ * engine.renderFile('foo/bar/baz.tmpl', {name: 'Jon'});
  * //=> 'Jon'
  * ```
  *
