@@ -74,7 +74,7 @@ engine.render = function lodashRender(str, options, cb) {
   opts = _.merge({}, opts, settings.imports);
   try {
     // Pass file extension for use in assemble v0.6.x
-    cb(null, _.template(str, opts, settings), '.html');
+    cb(null, _.template(str, settings)(opts), '.html');
   } catch (err) {
     console.log(chalk.red('%s'), err);
     debug('engine lodash [render]: %s', err);
@@ -118,7 +118,7 @@ engine.renderSync = function lodashRenderSync(str, options) {
   }
 
   try {
-    return _.template(str, opts, settings);
+    return _.template(str, settings)(opts);
   } catch (err) {
     console.log(chalk.red('%s'), err);
     debug('engine lodash [renderSync]: %s', err);
