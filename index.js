@@ -76,8 +76,8 @@ engine.render = function lodashRender(str, options, cb) {
     // Pass file extension for use in assemble v0.6.x
     cb(null, _.template(str, opts, settings), '.html');
   } catch (err) {
-    console.log(chalk.red('%j'), err);
-    debug('engine lodash [render]: %j', err);
+    console.log(chalk.red('%s'), err);
+    debug('engine lodash [render]: %s', err);
     cb(err);
   }
 };
@@ -120,8 +120,8 @@ engine.renderSync = function lodashRenderSync(str, options) {
   try {
     return _.template(str, opts, settings);
   } catch (err) {
-    console.log(chalk.red('%j'), err);
-    debug('engine lodash [renderSync]: %j', err);
+    console.log(chalk.red('%s'), err);
+    debug('engine lodash [renderSync]: %s', err);
     return err;
   }
 };
@@ -151,8 +151,8 @@ engine.renderFile = function lodashRenderFile(filepath, options, cb) {
     var str = fs.readFileSync(filepath, 'utf8');
     engine.render(str, options, cb);
   } catch (err) {
-    console.log(chalk.red('%j'), err);
-    debug('engine lodash [renderFile]: %j', err);
+    console.log(chalk.red('%s'), err);
+    debug('engine lodash [renderFile]: %s', err);
     cb(err);
     return;
   }
