@@ -1,7 +1,7 @@
 /*!
  * engine-lodash <https://github.com/jonschlinkert/engine-lodash>
  *
- * Copyright (c) 2014 Jon Schlinkert, Brian Woodward, contributors.
+ * Copyright (c) 2014-2015, Jon Schlinkert, Brian Woodwar.
  * Licensed under the MIT license.
  */
 
