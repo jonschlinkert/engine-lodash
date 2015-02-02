@@ -36,10 +36,39 @@ var engine = utils.fromStringRenderer('lodash');
  * @api public
  */
 
-engine.render = function lodashRender(str, options, cb) {
+engine.render = function lodashRender(fn, options, cb) {
   if (typeof options === 'function') {
     cb = options;
     options = {};
+  }
+
+  options = options || {};
+  if (typeof fn === 'string') {
+    fn = engine.compile(fn, options);
+  }
+
+  // options = _.merge({}, options, settings.imports);
+  try {
+    // Pass file extension for use in assemble v0.6.x
+    cb(null, engine.renderSync(fn, options), '.html');
+  } catch (err) {
+    console.log(chalk.red('%s'), err);
+    debug('engine lodash [render]: %s', err);
+    cb(err);
+  }
+};
+
+engine.compile = function lodashCompile(str, options, cb) {
+  if (typeof options === 'function') {
+    cb = options;
+    options = {};
+  }
+
+  if (typeof cb !== 'function') {
+    cb = function (err, fn) {
+      if (err) throw err;
+      return fn;
+    };
   }
 
   options = options || {};
@@ -71,14 +100,13 @@ engine.render = function lodashRender(str, options, cb) {
     }
   }
 
-  opts = _.merge({}, opts, settings.imports);
   try {
     // Pass file extension for use in assemble v0.6.x
-    cb(null, _.template(str, settings)(opts), '.html');
+    return cb(null, _.template(str, settings));
   } catch (err) {
     console.log(chalk.red('%s'), err);
     debug('engine lodash [render]: %s', err);
-    cb(err);
+    return cb(err);
   }
 };
 
@@ -100,25 +128,19 @@ engine.render = function lodashRender(str, options, cb) {
  * @api public
  */
 
-engine.renderSync = function lodashRenderSync(str, options) {
-  var opts = _.merge({}, options);
-  var settings = {};
+engine.renderSync = function lodashRenderSync(fn, options) {
 
-  _.merge(settings, opts);
-  _.merge(settings, opts.settings);
-  settings.imports = opts.imports || opts.helpers || {};
+  var context = _.extend({}, options);
 
-  if (opts.mixins) {
-    _.mixin(opts.mixins);
-  }
-
-  if (opts.delims) {
-    var delims = delimiters.templates(opts.delims);
-    _.merge(settings, delims, opts);
+  options = options || {};
+  if (typeof fn === 'string') {
+    context = _.omit(options, ['helpers', 'imports']);
+    fn = engine.compile(fn, options);
   }
 
   try {
-    return _.template(str, settings)(opts);
+    // Pass file extension for use in assemble v0.6.x
+    return fn(context);
   } catch (err) {
     console.log(chalk.red('%s'), err);
     debug('engine lodash [renderSync]: %s', err);
@@ -148,8 +170,7 @@ engine.renderFile = function lodashRenderFile(filepath, options, cb) {
   }
 
   try {
-    var str = fs.readFileSync(filepath, 'utf8');
-    engine.render(str, options, cb);
+    return engine.render(fs.readFileSync(filepath, 'utf8'), options, cb);
   } catch (err) {
     console.log(chalk.red('%s'), err);
     debug('engine lodash [renderFile]: %s', err);
