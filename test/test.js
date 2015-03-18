@@ -1,17 +1,17 @@
 /*!
  * engine-lodash <https://github.com/jonschlinkert/engine-lodash>
  *
- * Copyright (c) 2014-2015, Jon Schlinkert, Brian Woodwar.
- * Licensed under the MIT license.
+ * Copyright (c) 2014-2015, Jon Schlinkert.
+ * Licensed under the MIT License.
  */
 
 'use strict';
 
+/* deps:mocha */
 var fs = require('fs');
 var path = require('path');
 var should = require('should');
 var lodash = require('..');
-
 
 describe('.renderSync()', function () {
   it('should render templates.', function () {
