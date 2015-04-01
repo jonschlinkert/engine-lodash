@@ -18,6 +18,14 @@ var _ = require('lodash');
 var engine = utils.fromStringRenderer('lodash');
 
 /**
+ * expose engine `defaults`
+ */
+
+engine.defaults = {
+  dest: {ext: '.html'}
+};
+
+/**
  * Lodash string support. Render the given `str` and invoke the callback `callback(err, str)`.
  *
  * ```js
@@ -48,7 +56,7 @@ engine.render = function lodashRender(fn, options, cb) {
 
   try {
     // Pass file extension for use in assemble v0.6.x
-    cb(null, engine.renderSync(fn, options), '.html');
+    cb(null, engine.renderSync(fn, options));
   } catch (err) {
     console.log(chalk.red('%s'), err);
     cb(err);
