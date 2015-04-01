@@ -21,7 +21,7 @@ var engine = utils.fromStringRenderer('lodash');
  * expose engine `defaults`
  */
 
-engine.defaults = {
+engine.options = {
   dest: {ext: '.html'}
 };
 
