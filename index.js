@@ -18,6 +18,12 @@ var _ = require('lodash');
 var engine = utils.fromStringRenderer('lodash');
 
 /**
+ * Expose lodash
+ */
+
+engine.lodash = _;
+
+/**
  * expose engine `defaults`
  */
 
