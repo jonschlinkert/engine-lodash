@@ -5,7 +5,8 @@
  */
 
 var fs = require('fs');
-var chalk = require('chalk');
+var red = require('ansi-red');
+var yellow = require('ansi-yellow');
 var delimiters = require('delimiter-regex');
 var debug = require('debug')('engine:lodash');
 var utils = require('engine-utils');
@@ -18,7 +19,7 @@ var _ = require('lodash');
 var engine = utils.fromStringRenderer('lodash');
 
 /**
- * Expose lodash
+ * Expose `lodash`
  */
 
 engine.lodash = _;
@@ -64,7 +65,7 @@ engine.render = function lodashRender(fn, options, cb) {
     // Pass file extension for use in assemble v0.6.x
     cb(null, engine.renderSync(fn, options));
   } catch (err) {
-    console.log(chalk.red('%s'), err);
+    console.log(red(err));
     cb(err);
   }
 };
@@ -85,45 +86,40 @@ engine.compile = function lodashCompile(str, options, cb) {
     options = {};
   }
 
-  if (typeof cb !== 'function') {
-    cb = function (err, fn) {
-      if (err) throw err;
-      return fn;
-    };
-  }
-
   options = options || {};
 
-  if (options.mixins) {
-    _.mixin(options.mixins);
-  }
-
-  var delims = _.pick(options, ['interpolate', 'evaluate', 'escape']);
-  var opts = _.omit(options, ['helpers', 'imports']);
-  var fns = _.pick(options, ['helpers', 'imports']);
-
-  var settings = {};
-  if (options.delims) {
-    delims = _.merge({}, delimsObject(options.delims), delims);
-  }
-
-  settings.imports = _.extend({}, fns.helpers, fns.imports);
-  settings = _.extend({}, settings, delims);
-
-  if (options.debugEngine) {
-    var helpers = Object.keys(settings.imports);
-    for (var key in opts) {
-      if (helpers.indexOf(key) !== -1) {
-        errorMessage(settings, options, key);
-      }
-    }
-  }
-
   try {
+    if (typeof cb !== 'function') {
+      cb = function cb(err, fn) {
+        if (err) throw err;
+        return fn;
+      };
+    }
+
+    if (options.mixins) {
+      _.mixin(options.mixins);
+    }
+
+    var delims = _.pick(options, ['interpolate', 'evaluate', 'escape']);
+    var opts = _.omit(options, ['helpers', 'imports']);
+    var fns = _.pick(options, ['helpers', 'imports']);
+    var settings = {};
+
+    if (Array.isArray(options.delims)) {
+      delims = _.merge({}, delimsObject(options.delims), delims);
+    }
+
+    settings.imports = _.merge({}, fns.helpers, fns.imports);
+    settings = _.merge({}, settings, delims || {});
+
+    if (options.debugEngine) {
+      inspectHelpers(settings, opts);
+    }
+
     // Pass file extension for use in assemble v0.6.x
     return cb(null, _.template(str, settings));
   } catch (err) {
-    console.log(chalk.red('%s'), err);
+    console.log(red(err));
     return cb(err);
   }
 };
@@ -159,7 +155,7 @@ engine.renderSync = function lodashRenderSync(fn, options) {
     // Pass file extension for use in assemble v0.6.x
     return fn(context);
   } catch (err) {
-    console.log(chalk.red('%s'), err);
+    console.log(red(err));
     return err;
   }
 };
@@ -188,17 +184,20 @@ engine.renderFile = function lodashRenderFile(filepath, options, cb) {
   try {
     return engine.render(fs.readFileSync(filepath, 'utf8'), options, cb);
   } catch (err) {
-    console.log(chalk.red('%s'), err);
+    console.log(red(err));
 
     cb(err);
     return;
   }
 };
 
+/**
+ * Handle custom delimiters
+ */
+
 function delimsObject(delims) {
   var a = delims[0], b = delims[1];
   var res = {};
-
   res.interpolate = delimiters(a + '=', b);
   res.evaluate = delimiters(a, b);
   res.escape = delimiters(a + '-', b);
@@ -206,14 +205,27 @@ function delimsObject(delims) {
 }
 
 /**
- * Error message displayed when `options.debugEngine`
- * is defined and an error is thrown.
+ * Inspect helpers if `debugEngine` is enabled
  */
 
-function errorMessage(settings, options, key) {
-  console.log(chalk.yellow('[engine-lodash] property "' + key + '" is on both:'));
-  console.log(chalk.yellow('  - settings.imports as a(n): ', typeof settings.imports[key]));
-  console.log(chalk.yellow('  - options as a(n): ', typeof options[key]));
+function inspectHelpers(settings, opts) {
+  var helpers = Object.keys(settings.imports);
+  for (var key in opts) {
+    if (helpers.indexOf(key) !== -1) {
+      conflictMessage(settings, opts, key);
+    }
+  }
+}
+
+/**
+ * Conflict report displayed when the same key exists as both
+ * a helper name and the key of a (data) property on the context.
+ */
+
+function conflictMessage(settings, options, key) {
+  console.log(yellow('[engine-lodash] property "' + key + '" is on both:'));
+  console.log(yellow('  - settings.imports as a(n): ', typeof settings.imports[key]));
+  console.log(yellow('  - options as a(n): ', typeof options[key]));
 }
 
 /**

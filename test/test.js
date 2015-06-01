@@ -28,7 +28,6 @@ describe('.renderSync()', function () {
   });
 });
 
-
 describe('.render()', function() {
   it('should render templates.', function(done) {
     var ctx = {name: 'Jon Schlinkert'};
@@ -73,6 +72,21 @@ describe('.render()', function() {
 
     lodash.render('<%= upper(include("content.tmpl")) %>', ctx, function (err, content) {
       content.should.equal('JON SCHLINKERT');
+      done();
+    });
+  });
+
+  it('should log errors when conflicting data is found.', function(done) {
+    var ctx = {
+      name: 'Jon Schlinkert',
+      foo: 'bar',
+      imports: {
+        foo: function() {}
+      }
+    };
+    ctx.debugEngine = true;
+    lodash.render('<%= name %>', ctx, function (err, content) {
+      content.should.equal('Jon Schlinkert');
       done();
     });
   });
