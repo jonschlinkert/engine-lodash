@@ -6,9 +6,7 @@
 
 var fs = require('fs');
 var red = require('ansi-red');
-var yellow = require('ansi-yellow');
 var delimiters = require('delimiter-regex');
-var debug = require('debug')('engine:lodash');
 var utils = require('engine-utils');
 var _ = require('lodash');
 
@@ -19,7 +17,7 @@ var _ = require('lodash');
 var engine = utils.fromStringRenderer('lodash');
 
 /**
- * Expose `lodash`
+ * Expose our instance of lodash
  */
 
 engine.lodash = _;
@@ -29,7 +27,8 @@ engine.lodash = _;
  */
 
 engine.options = {
-  dest: {ext: '.html'}
+  name: 'lodash',
+  dest: {ext: '.html'},
 };
 
 /**
@@ -55,18 +54,14 @@ engine.render = function lodashRender(fn, options, cb) {
     cb = options;
     options = {};
   }
-
   options = options || {};
   if (typeof fn === 'string') {
     fn = engine.compile(fn, options);
   }
-
   try {
-    // Pass file extension for use in assemble v0.6.x
     cb(null, engine.renderSync(fn, options));
   } catch (err) {
-    console.log(red(err));
-    cb(err);
+    return cb(err);
   }
 };
 
@@ -86,15 +81,15 @@ engine.compile = function lodashCompile(str, options, cb) {
     options = {};
   }
 
-  options = options || {};
-
   try {
     if (typeof cb !== 'function') {
-      cb = function cb(err, fn) {
+      cb = function callback(err, fn) {
         if (err) throw err;
         return fn;
       };
     }
+    options = options || {};
+    var settings = {};
 
     if (options.mixins) {
       _.mixin(options.mixins);
@@ -103,7 +98,6 @@ engine.compile = function lodashCompile(str, options, cb) {
     var delims = _.pick(options, ['interpolate', 'evaluate', 'escape']);
     var opts = _.omit(options, ['helpers', 'imports']);
     var fns = _.pick(options, ['helpers', 'imports']);
-    var settings = {};
 
     if (Array.isArray(options.delims)) {
       delims = _.merge({}, delimsObject(options.delims), delims);
@@ -116,10 +110,8 @@ engine.compile = function lodashCompile(str, options, cb) {
       inspectHelpers(settings, opts);
     }
 
-    // Pass file extension for use in assemble v0.6.x
     return cb(null, _.template(str, settings));
   } catch (err) {
-    console.log(red(err));
     return cb(err);
   }
 };
@@ -129,8 +121,8 @@ engine.compile = function lodashCompile(str, options, cb) {
  *
  * ```js
  * var engine = require('engine-lodash');
- * engine.renderSync('<%= name %>', {name: 'Jon'});
- * //=> 'Jon'
+ * engine.renderSync('<%= name %>', {name: 'Halle'});
+ * //=> 'Halle'
  * ```
  *
  * @param  {Object} `str` The string to render.
@@ -152,10 +144,8 @@ engine.renderSync = function lodashRenderSync(fn, options) {
   }
 
   try {
-    // Pass file extension for use in assemble v0.6.x
     return fn(context);
   } catch (err) {
-    console.log(red(err));
     return err;
   }
 };
@@ -165,8 +155,8 @@ engine.renderSync = function lodashRenderSync(fn, options) {
  *
  * ```js
  * var engine = require('engine-lodash');
- * engine.renderFile('foo/bar/baz.tmpl', {name: 'Jon'});
- * //=> 'Jon'
+ * engine.renderFile('foo/bar/baz.tmpl', {name: 'Halle'});
+ * //=> 'Halle'
  * ```
  *
  * @param {String} `path`
@@ -180,14 +170,10 @@ engine.renderFile = function lodashRenderFile(filepath, options, cb) {
     cb = options;
     options = {};
   }
-
   try {
     return engine.render(fs.readFileSync(filepath, 'utf8'), options, cb);
   } catch (err) {
-    console.log(red(err));
-
-    cb(err);
-    return;
+    return cb(err);
   }
 };
 
@@ -223,9 +209,16 @@ function inspectHelpers(settings, opts) {
  */
 
 function conflictMessage(settings, options, key) {
-  console.log(yellow('[engine-lodash] property "' + key + '" is on both:'));
-  console.log(yellow('  - settings.imports as a(n): ', typeof settings.imports[key]));
-  console.log(yellow('  - options as a(n): ', typeof options[key]));
+  console.error(red('engine-lodash: Error: property "' + key + '" is on both:'));
+  var type = (typeof settings.imports[key]);
+  console.error(red('  - settings.imports as ' + article(type) + ': ' + type));
+  type = (typeof options[key]);
+  console.error(red('  - options as ' + article(type) + ': ' + type));
+}
+
+function article(word) {
+  var n = /^[aeiou]/.test(word);
+  return n ? 'an' : 'a';
 }
 
 /**
