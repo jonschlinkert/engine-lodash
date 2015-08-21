@@ -92,23 +92,22 @@ engine.compile = function lodashCompile(str, options, cb) {
         return fn;
       };
     }
+
     options = options || {};
+    options.settings = options.settings || {};
     var settings = {};
 
     if (options.mixins) {
       lazy._.mixin(options.mixins);
     }
 
-    var delims = lazy._.pick(options, ['interpolate', 'evaluate', 'escape']);
-    var opts = lazy._.omit(options, ['helpers', 'imports']);
-    var fns = lazy._.pick(options, ['helpers', 'imports']);
-
-    if (Array.isArray(options.delims)) {
-      delims = lazy._.merge({}, delimsObject(options.delims), delims);
-    }
+    var picked = lazy._.merge(pick(options), pick(options.settings));
+    var delims = picked.delims;
+    var opts = picked.opts;
+    var fns = picked.fns;
 
     settings.imports = lazy._.merge({}, fns.helpers, fns.imports);
-    settings = lazy._.merge({}, settings, delims || {});
+    settings = lazy._.merge({}, settings, delims);
 
     if (options.debugEngine) {
       inspectHelpers(settings, opts);
@@ -223,6 +222,17 @@ function conflictMessage(settings, options, key) {
 function article(word) {
   var n = /^[aeiou]/.test(word);
   return n ? 'an' : 'a';
+}
+
+function pick(obj) {
+  var res = {};
+  res.delims = lazy._.pick(obj, ['interpolate', 'evaluate', 'escape']);
+  res.opts = lazy._.omit(obj, ['helpers', 'imports']);
+  res.fns = lazy._.pick(obj, ['helpers', 'imports']);
+  if (Array.isArray(obj.delims)) {
+    res.delims = lazy._.merge({}, delimsObject(obj.delims), res.delims);
+  }
+  return res;
 }
 
 /**
