@@ -1,13 +1,10 @@
 {
   "name": "engine-lodash",
   "description": "Lo-Dash engine, consolidate.js style but with enhancements. Works with Assemble, express.js, engine-cache or any application that follows consolidate.js conventions.",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "homepage": "https://github.com/jonschlinkert/engine-lodash",
-  "author": {
-    "name": "Jon Schlinkert",
-    "url": "https://github.com/jonschlinkert"
-  },
-  "authors": [
+  "author": "https://github.com/jonschlinkert",
+  "maintainers": [
     {
       "name": "Jon Schlinkert",
       "username": "jonschlinkert"
@@ -17,10 +14,7 @@
       "username": "doowb"
     }
   ],
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/jonschlinkert/engine-lodash.git"
-  },
+  "repository": "jonschlinkert/engine-lodash",
   "bugs": {
     "url": "https://github.com/jonschlinkert/engine-lodash/issues"
   },
@@ -39,11 +33,13 @@
     "ansi-red": "^0.1.1",
     "delimiter-regex": "^1.3.1",
     "engine-utils": "^0.1.1",
-    "lodash": "^3.9.3"
+    "lazy-cache": "^0.2.3",
+    "lodash": "^3.10.1"
   },
   "devDependencies": {
     "mocha": "*",
-    "should": "^4.0.4"
+    "should": "^4.0.4",
+    "time-require": "jonschlinkert/time-require"
   },
   "keywords": [
     "engine",
