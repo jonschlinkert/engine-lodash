@@ -1,7 +1,7 @@
 {
   "name": "engine-lodash",
   "description": "Lo-Dash engine, consolidate.js style but with enhancements. Works with Assemble, express.js, engine-cache or any application that follows consolidate.js conventions.",
-  "version": "0.8.0",
+  "version": "0.8.2",
   "homepage": "https://github.com/jonschlinkert/engine-lodash",
   "author": "https://github.com/jonschlinkert",
   "maintainers": [
