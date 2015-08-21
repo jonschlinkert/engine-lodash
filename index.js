@@ -5,22 +5,26 @@
  */
 
 var fs = require('fs');
-var red = require('ansi-red');
-var delimiters = require('delimiter-regex');
-var utils = require('engine-utils');
-var _ = require('lodash');
+var lazy = require('lazy-cache')(require);
+lazy('ansi-red', 'red');
+lazy('delimiter-regex', 'delimiters');
+lazy('engine-utils', 'utils');
+lazy('lodash', '_');
 
 /**
  * Lodash support.
  */
 
-var engine = utils.fromStringRenderer('lodash');
+var engine = lazy.utils.fromStringRenderer('lodash');
 
 /**
- * Expose our instance of lodash
+ * Expose this instance of lodash. To keep it "lazy"
+ * it must be called necessary to access the instance.
  */
 
-engine.lodash = _;
+engine.lodash = function () {
+  return lazy._;
+};
 
 /**
  * expose engine `defaults`
@@ -92,25 +96,25 @@ engine.compile = function lodashCompile(str, options, cb) {
     var settings = {};
 
     if (options.mixins) {
-      _.mixin(options.mixins);
+      lazy._.mixin(options.mixins);
     }
 
-    var delims = _.pick(options, ['interpolate', 'evaluate', 'escape']);
-    var opts = _.omit(options, ['helpers', 'imports']);
-    var fns = _.pick(options, ['helpers', 'imports']);
+    var delims = lazy._.pick(options, ['interpolate', 'evaluate', 'escape']);
+    var opts = lazy._.omit(options, ['helpers', 'imports']);
+    var fns = lazy._.pick(options, ['helpers', 'imports']);
 
     if (Array.isArray(options.delims)) {
-      delims = _.merge({}, delimsObject(options.delims), delims);
+      delims = lazy._.merge({}, delimsObject(options.delims), delims);
     }
 
-    settings.imports = _.merge({}, fns.helpers, fns.imports);
-    settings = _.merge({}, settings, delims || {});
+    settings.imports = lazy._.merge({}, fns.helpers, fns.imports);
+    settings = lazy._.merge({}, settings, delims || {});
 
     if (options.debugEngine) {
       inspectHelpers(settings, opts);
     }
 
-    return cb(null, _.template(str, settings));
+    return cb(null, lazy._.template(str, settings));
   } catch (err) {
     return cb(err);
   }
@@ -135,11 +139,11 @@ engine.compile = function lodashCompile(str, options, cb) {
  */
 
 engine.renderSync = function lodashRenderSync(fn, options) {
-  var context = _.extend({}, options);
+  var context = lazy._.extend({}, options);
 
   options = options || {};
   if (typeof fn === 'string') {
-    context = _.omit(options, ['helpers', 'imports']);
+    context = lazy._.omit(options, ['helpers', 'imports']);
     fn = engine.compile(fn, options);
   }
 
@@ -184,9 +188,9 @@ engine.renderFile = function lodashRenderFile(filepath, options, cb) {
 function delimsObject(delims) {
   var a = delims[0], b = delims[1];
   var res = {};
-  res.interpolate = delimiters(a + '=', b);
-  res.evaluate = delimiters(a, b);
-  res.escape = delimiters(a + '-', b);
+  res.interpolate = lazy.delimiters(a + '=', b);
+  res.evaluate = lazy.delimiters(a, b);
+  res.escape = lazy.delimiters(a + '-', b);
   return res;
 }
 
@@ -209,11 +213,11 @@ function inspectHelpers(settings, opts) {
  */
 
 function conflictMessage(settings, options, key) {
-  console.error(red('engine-lodash: Error: property "' + key + '" is on both:'));
+  console.error(lazy.red('engine-lodash: Error: property "' + key + '" is on both:'));
   var type = (typeof settings.imports[key]);
-  console.error(red('  - settings.imports as ' + article(type) + ': ' + type));
+  console.error(lazy.red('  - settings.imports as ' + article(type) + ': ' + type));
   type = (typeof options[key]);
-  console.error(red('  - options as ' + article(type) + ': ' + type));
+  console.error(lazy.red('  - options as ' + article(type) + ': ' + type));
 }
 
 function article(word) {
